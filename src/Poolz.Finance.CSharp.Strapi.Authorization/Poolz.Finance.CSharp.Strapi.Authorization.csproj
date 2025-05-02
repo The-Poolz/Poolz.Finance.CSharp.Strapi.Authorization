@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Net.Web3.EthereumWallet" Version="1.2.0" />
+    <PackageReference Include="Poolz.Finance.CSharp.Strapi" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>
