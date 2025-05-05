@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Net.Web3.EthereumWallet;
 
-namespace Poolz.Finance.CSharp.Strapi.Authorization
+namespace Poolz.Finance.CSharp.Strapi.Authorization;
+
+public interface IAuthorizationService
 {
-    interface IAuthorizationService
-    {
-    }
+    public Task<bool> IsAuthorizedAsync(EthereumAddress address, string resource);
 }

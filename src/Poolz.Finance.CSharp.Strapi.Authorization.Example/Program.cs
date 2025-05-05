@@ -1,12 +1,11 @@
-﻿namespace Poolz.Finance.CSharp.Strapi.Authorization.Example
-{
-    internal class Program
-    {
-        static async Task Main(string[] args)
-        {
-            var authService = new AuthorizationService(new StrapiClient());
+﻿namespace Poolz.Finance.CSharp.Strapi.Authorization.Example;
 
-            await authService.IsAuthorizedAsync("0x", "resource");
-        }
+internal class Program
+{
+    private static async Task Main()
+    {
+        var authService = new AuthorizationService(new StrapiClient());
+
+        await authService.IsAuthorizedAsync("0x", "resource");
     }
 }

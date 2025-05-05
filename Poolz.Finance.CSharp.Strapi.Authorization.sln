@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Poolz.Finance.CSharp.Strapi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Poolz.Finance.CSharp.Strapi.Authorization.Example", "src\Poolz.Finance.CSharp.Strapi.Authorization.Example\Poolz.Finance.CSharp.Strapi.Authorization.Example.csproj", "{15E065D6-7510-43F9-9AAC-D5C5AF2E887D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{DFA6466D-96B3-4130-B2D1-BDBC70A9DC9D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Poolz.Finance.CSharp.Strapi.Authorization.Tests", "tests\Poolz.Finance.CSharp.Strapi.Authorization.Tests\Poolz.Finance.CSharp.Strapi.Authorization.Tests.csproj", "{0FD507A0-B065-4504-A8D6-6ECA145D32FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +27,10 @@ Global
 		{15E065D6-7510-43F9-9AAC-D5C5AF2E887D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15E065D6-7510-43F9-9AAC-D5C5AF2E887D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15E065D6-7510-43F9-9AAC-D5C5AF2E887D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FD507A0-B065-4504-A8D6-6ECA145D32FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FD507A0-B065-4504-A8D6-6ECA145D32FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FD507A0-B065-4504-A8D6-6ECA145D32FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FD507A0-B065-4504-A8D6-6ECA145D32FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -30,6 +38,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{94A5C524-FC8C-007D-A53E-BF968B25DC62} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{15E065D6-7510-43F9-9AAC-D5C5AF2E887D} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{0FD507A0-B065-4504-A8D6-6ECA145D32FB} = {DFA6466D-96B3-4130-B2D1-BDBC70A9DC9D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B7379DDE-1A13-437A-8DF7-45CE5877BD6F}

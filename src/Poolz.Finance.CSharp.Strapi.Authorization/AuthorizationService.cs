@@ -2,48 +2,27 @@
 
 namespace Poolz.Finance.CSharp.Strapi.Authorization;
 
-public class AuthorizationService(StrapiClient strapi)
+public class AuthorizationService(IStrapiClient strapi) : IAuthorizationService
 {
     public async Task<bool> IsAuthorizedAsync(EthereumAddress address, string resource)
     {
         var authInfo = await strapi.ReceiveAuthInformationAsync(address, resource);
 
-        var isAdmin = authInfo.Admins.Any(x => x.Wallet == address);
-        Console.WriteLine($"Is Admin: {isAdmin}");
-        if (isAdmin) return true;
+        if (IsAdmin(authInfo, address)) return true;
+        if (IsAdminResource(authInfo, resource)) return false;
 
-        var isAdminResource = authInfo.AdminResource.OnlyAdminResources.Any(x => x.Name == resource);
-        Console.WriteLine($"Is Admin Resource: {isAdminResource}");
-        if (isAdminResource) return false;
+        var resourceEntry = authInfo.Resources.FirstOrDefault(r => r.Name.Equals(resource, StringComparison.Ordinal));
+        var userEntry = authInfo.Users.FirstOrDefault(u => u.Wallet.Equals(address, StringComparison.Ordinal));
+        if (resourceEntry == null || userEntry == null) return false;
 
-        var resourceRoles = authInfo.Resources.FirstOrDefault(x => x.Name == resource)?.RoleIDs.Select(r => r.Name).ToArray();
-        if (resourceRoles == null)
-        {
-            Console.WriteLine("Resource not found.");
-            return false;
-        }
+        return IsAllowedResource(resourceEntry, userEntry);
+    }
 
-        Console.WriteLine($"Roles allowed for resource {resource}:");
-        foreach (var res in resourceRoles)
-        {
-            Console.WriteLine(res);
-        }
-
-        var userRoles = authInfo.Users.FirstOrDefault(x => x.Wallet == address)?.RoleIDs.Select(r => r.Name).ToArray();
-        if (userRoles == null)
-        {
-            Console.WriteLine("User not found.");
-            return false;
-        }
-
-        Console.WriteLine($"User {address} roles:");
-        foreach (var us in userRoles)
-        {
-            Console.WriteLine(us);
-        }
-
-        var isAuthorizedToCall = userRoles.Intersect(resourceRoles).Any();
-        Console.WriteLine($"Is Authorized to call {isAuthorizedToCall}");
-        return isAuthorizedToCall;
+    internal static bool IsAdmin(GraphQLAuthResponse authInfo, EthereumAddress address) => authInfo.Admins.Any(x => x.Wallet == address);
+    internal static bool IsAdminResource(GraphQLAuthResponse authInfo, string resource) => authInfo.AdminResource.OnlyAdminResources.Any(x => x.Name == resource);
+    internal static bool IsAllowedResource(AuthResource resource, AuthUser user)
+    {
+        var resourceRoles = resource.RoleIDs.Select(r => r.Name).ToHashSet(StringComparer.Ordinal);
+        return user.RoleIDs.Any(r => resourceRoles.Contains(r.Name));
     }
 }
