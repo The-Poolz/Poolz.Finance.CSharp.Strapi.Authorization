@@ -4,7 +4,26 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>Poolz.Finance.CSharp.Strapi.Authorization</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>ArdenHide, Lomet</Authors>
+    <Company>The-Poolz</Company>
+    <Product>Poolz.Finance.CSharp.Strapi.Authorization</Product>
+    <Title>Library that handle API4 authorization process via GraphQL Strapi API.</Title>
+    <Description>Library that handle API4 authorization process via GraphQL Strapi API.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/The-Poolz/Poolz.Finance.CSharp.Strapi.Authorization</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IncludeSymbols>True</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Net.Web3.EthereumWallet" Version="1.2.0" />
