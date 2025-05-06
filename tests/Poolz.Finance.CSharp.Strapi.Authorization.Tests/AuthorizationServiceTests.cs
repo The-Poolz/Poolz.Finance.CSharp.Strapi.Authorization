@@ -8,15 +8,20 @@ public class AuthorizationServiceTests
 {
     public class IsAuthorizedAsync
     {
-        private static readonly IStrapiClient _strapi = new MockStrapiClient();
-        private readonly AuthorizationService _authorizationService = new(_strapi);
-
         [Fact]
         internal async Task WhenAdministratorCall_ShouldReturnTrue()
         {
-            var result = await _authorizationService.IsAuthorizedAsync(
-                address: MockGraphQLAuthResponse.Admin,
-                resource: MockGraphQLAuthResponse.Resource1.Name
+            var response = new GraphQLAuthResponse(
+                AdminResource: new AuthAdministratorsResource(),
+                Admins: [new AuthAdministrator ()],
+                Users: []
+            );
+            var strapi = new MockStrapiClient(response);
+            var authorizationService = new AuthorizationService(strapi);
+
+            var result = await authorizationService.IsAuthorizedAsync(
+                address: EthereumAddress.ZeroAddress,
+                resource: "mock resource"
             );
 
             result.Should().BeTrue();
@@ -25,31 +30,20 @@ public class AuthorizationServiceTests
         [Fact]
         internal async Task WhenUserCallAdministratorResource_ShouldReturnFalse()
         {
-            var result = await _authorizationService.IsAuthorizedAsync(
-                address: MockGraphQLAuthResponse.User.Wallet,
-                resource: MockGraphQLAuthResponse.AdminResource
+            var response = new GraphQLAuthResponse(
+                AdminResource: new AuthAdministratorsResource
+                {
+                    OnlyAdminResources = new List<AuthResource> { new() }
+                },
+                Admins: [],
+                Users: []
             );
+            var strapi = new MockStrapiClient(response);
+            var authorizationService = new AuthorizationService(strapi);
 
-            result.Should().BeFalse();
-        }
-
-        [Fact]
-        internal async Task WhenResourceNotFound_ShouldReturnFalse()
-        {
-            var result = await _authorizationService.IsAuthorizedAsync(
-                address: MockGraphQLAuthResponse.User.Wallet,
-                resource: "another one resource"
-            );
-
-            result.Should().BeFalse();
-        }
-
-        [Fact]
-        internal async Task WhenUserNotFound_ShouldReturnFalse()
-        {
-            var result = await _authorizationService.IsAuthorizedAsync(
+            var result = await authorizationService.IsAuthorizedAsync(
                 address: EthereumAddress.ZeroAddress,
-                resource: MockGraphQLAuthResponse.Resource1.Name
+                resource: "mock resource"
             );
 
             result.Should().BeFalse();
@@ -58,9 +52,20 @@ public class AuthorizationServiceTests
         [Fact]
         internal async Task WhenAllowedResourceForUser_ShouldReturnTrue()
         {
-            var result = await _authorizationService.IsAuthorizedAsync(
-                address: MockGraphQLAuthResponse.User.Wallet,
-                resource: MockGraphQLAuthResponse.Resource1.Name
+            var response = new GraphQLAuthResponse(
+                AdminResource: new AuthAdministratorsResource
+                {
+                    OnlyAdminResources = new List<AuthResource>()
+                },
+                Admins: [],
+                Users: [new AuthUser()]
+            );
+            var strapi = new MockStrapiClient(response);
+            var authorizationService = new AuthorizationService(strapi);
+
+            var result = await authorizationService.IsAuthorizedAsync(
+                address: EthereumAddress.ZeroAddress,
+                resource: "mock resource"
             );
 
             result.Should().BeTrue();
@@ -69,9 +74,20 @@ public class AuthorizationServiceTests
         [Fact]
         internal async Task WhenNotAllowedResourceForUser_ShouldReturnFalse()
         {
-            var result = await _authorizationService.IsAuthorizedAsync(
-                address: MockGraphQLAuthResponse.User.Wallet,
-                resource: MockGraphQLAuthResponse.Resource2.Name
+            var response = new GraphQLAuthResponse(
+                AdminResource: new AuthAdministratorsResource
+                {
+                    OnlyAdminResources = new List<AuthResource>()
+                },
+                Admins: [],
+                Users: []
+            );
+            var strapi = new MockStrapiClient(response);
+            var authorizationService = new AuthorizationService(strapi);
+
+            var result = await authorizationService.IsAuthorizedAsync(
+                address: EthereumAddress.ZeroAddress,
+                resource: "mock resource"
             );
 
             result.Should().BeFalse();
@@ -84,8 +100,7 @@ public class AuthorizationServiceTests
         internal void WhenAdministratorCall_ShouldReturnTrue()
         {
             var result = AuthorizationService.IsAdmin(
-                admins: [new AuthAdministrator { Wallet = MockGraphQLAuthResponse.Admin }],
-                address: MockGraphQLAuthResponse.Admin
+                admins: [new AuthAdministrator()]
             );
 
             result.Should().BeTrue();
@@ -95,8 +110,7 @@ public class AuthorizationServiceTests
         internal void WhenNonAdministratorCall_ShouldReturnFalse()
         {
             var result = AuthorizationService.IsAdmin(
-                admins: [new AuthAdministrator { Wallet = MockGraphQLAuthResponse.Admin }],
-                address: MockGraphQLAuthResponse.User.Wallet
+                admins: []
             );
 
             result.Should().BeFalse();
@@ -111,12 +125,8 @@ public class AuthorizationServiceTests
             var result = AuthorizationService.IsAdminResource(
                 adminResource: new AuthAdministratorsResource
                 {
-                    OnlyAdminResources = new List<AuthResource>
-                    {
-                        new() { Name = MockGraphQLAuthResponse.AdminResource }
-                    }
-                },
-                resource: MockGraphQLAuthResponse.AdminResource
+                    OnlyAdminResources = new List<AuthResource> { new() }
+                }
             );
 
             result.Should().BeTrue();
@@ -128,12 +138,8 @@ public class AuthorizationServiceTests
             var result = AuthorizationService.IsAdminResource(
                 adminResource: new AuthAdministratorsResource
                 {
-                    OnlyAdminResources = new List<AuthResource>
-                    {
-                        new() { Name = MockGraphQLAuthResponse.AdminResource }
-                    }
-                },
-                resource: "another one resource"
+                    OnlyAdminResources = new List<AuthResource>()
+                }
             );
 
             result.Should().BeFalse();
@@ -146,23 +152,17 @@ public class AuthorizationServiceTests
         internal void WhenAuthorizedCall_ShouldReturnTrue()
         {
             var result = AuthorizationService.IsAllowedResource(
-                resource: MockGraphQLAuthResponse.Resource1,
-                user: MockGraphQLAuthResponse.User
+                users: [new AuthUser()]
             );
 
             result.Should().BeTrue();
         }
 
         [Fact]
-        internal void WhenNotAuthorizedCall_ShouldReturnTrue()
+        internal void WhenNotAuthorizedCall_ShouldReturnFalse()
         {
             var result = AuthorizationService.IsAllowedResource(
-                resource: MockGraphQLAuthResponse.Resource1,
-                user: new AuthUser
-                {
-                    Wallet = MockGraphQLAuthResponse.User.Wallet,
-                    RoleIDs = new List<AuthRole> { new() { Name = "another one role" } }
-                }
+                users: []
             );
 
             result.Should().BeFalse();

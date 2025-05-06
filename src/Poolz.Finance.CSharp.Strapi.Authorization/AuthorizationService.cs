@@ -9,22 +9,10 @@ public class AuthorizationService(IStrapiClient strapi) : IAuthorizationService
     public async Task<bool> IsAuthorizedAsync(EthereumAddress address, string resource)
     {
         var authInfo = await strapi.ReceiveAuthInformationAsync(address, resource);
-
-        if (IsAdmin(authInfo.Admins, address)) return true;
-        if (IsAdminResource(authInfo.AdminResource, resource)) return false;
-
-        var resourceEntry = authInfo.Resources.FirstOrDefault(r => r.Name.Equals(resource, StringComparison.Ordinal));
-        var userEntry = authInfo.Users.FirstOrDefault(u => u.Wallet.Equals(address, StringComparison.Ordinal));
-        if (resourceEntry == null || userEntry == null) return false;
-
-        return IsAllowedResource(resourceEntry, userEntry);
+        return IsAdmin(authInfo.Admins) || (!IsAdminResource(authInfo.AdminResource) && IsAllowedResource(authInfo.Users));
     }
 
-    internal static bool IsAdmin(IEnumerable<AuthAdministrator> admins, EthereumAddress address) => admins.Any(x => x.Wallet == address);
-    internal static bool IsAdminResource(AuthAdministratorsResource adminResource, string resource) => adminResource.OnlyAdminResources.Any(x => x.Name == resource);
-    internal static bool IsAllowedResource(AuthResource resource, AuthUser user)
-    {
-        var resourceRoles = resource.RoleIDs.Select(r => r.Name).ToHashSet(StringComparer.Ordinal);
-        return user.RoleIDs.Any(r => resourceRoles.Contains(r.Name));
-    }
+    internal static bool IsAdmin(IEnumerable<AuthAdministrator> admins) => admins.Any();
+    internal static bool IsAdminResource(AuthAdministratorsResource adminResource) => adminResource.OnlyAdminResources.Any();
+    internal static bool IsAllowedResource(IEnumerable<AuthUser> users) => users.Any();
 }

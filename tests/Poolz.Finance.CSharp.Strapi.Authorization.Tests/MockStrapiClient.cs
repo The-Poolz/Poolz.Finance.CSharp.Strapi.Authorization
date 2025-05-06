@@ -2,10 +2,10 @@
 
 namespace Poolz.Finance.CSharp.Strapi.Authorization.Tests;
 
-internal class MockStrapiClient : IStrapiClient
+internal class MockStrapiClient(GraphQLAuthResponse response) : IStrapiClient
 {
     public Task<GraphQLAuthResponse> ReceiveAuthInformationAsync(EthereumAddress address, string resource)
     {
-        return Task.FromResult(MockGraphQLAuthResponse.Mock);
+        return Task.FromResult(response);
     }
 }

@@ -6,6 +6,5 @@ namespace Poolz.Finance.CSharp.Strapi.Authorization;
 public record GraphQLAuthResponse(
     [JsonProperty("authAdministratorsResource")] AuthAdministratorsResource AdminResource,
     [JsonProperty("authAdministrators")] IEnumerable<AuthAdministrator> Admins,
-    [JsonProperty("authUsers")] IEnumerable<AuthUser> Users,
-    [JsonProperty("authResources")] IEnumerable<AuthResource> Resources
+    [JsonProperty("authUsers")] IEnumerable<AuthUser> Users
 );

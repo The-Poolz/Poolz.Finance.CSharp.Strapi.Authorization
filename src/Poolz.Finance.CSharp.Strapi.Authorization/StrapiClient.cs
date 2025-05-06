@@ -24,42 +24,36 @@ public class StrapiClient(string apiUrl = StrapiClient.ApiUrl) : IStrapiClient
         {
             Wallet = new StringFilterInput { Eq = address.Address }
         });
-        var resourcesFilter = new GraphQlQueryParameter<AuthResourceFiltersInput>("resourcesFilter", new AuthResourceFiltersInput
-        {
-            Name = new StringFilterInput { Eq = resource }
-        });
         var usersFilter = new GraphQlQueryParameter<AuthUserFiltersInput>("usersFilter", new AuthUserFiltersInput
         {
-            Wallet = new StringFilterInput { Eq = address.Address }
+            Wallet = new StringFilterInput { Eq = address.Address },
+            RoleIDs = new AuthRoleFiltersInput
+            {
+                ResourceIDs = new AuthResourceFiltersInput
+                {
+                    Name = new StringFilterInput { Eq = resource }
+                }
+            }
         });
 
         var queryBuilder = new QueryQueryBuilder()
             .WithAuthAdministratorsResource(
                 new AuthAdministratorsResourceQueryBuilder().WithOnlyAdminResources(
-                    new AuthResourceQueryBuilder().WithName(),
-                    resourcesFilter
+                    new AuthResourceQueryBuilder().WithDocumentId(),
+                    adminResourcesFilter
                 )
             )
             .WithAuthAdministrators(
-                new AuthAdministratorQueryBuilder().WithWallet(),
+                new AuthAdministratorQueryBuilder().WithDocumentId(),
                 adminsFilter
             )
-            .WithAuthResources(
-                new AuthResourceQueryBuilder().WithName().WithRoleIDs(
-                    new AuthRoleQueryBuilder().WithName()
-                ),
-                adminResourcesFilter
-            )
             .WithAuthUsers(
-                new AuthUserQueryBuilder().WithWallet().WithRoleIDs(
-                    new AuthRoleQueryBuilder().WithName()
-                ),
+                new AuthUserQueryBuilder().WithDocumentId(),
                 usersFilter
             )
-            .WithParameter(resourcesFilter)
+            .WithParameter(adminResourcesFilter)
             .WithParameter(adminsFilter)
-            .WithParameter(usersFilter)
-            .WithParameter(adminResourcesFilter);
+            .WithParameter(usersFilter);
 
         var response = await _client.SendQueryAsync<GraphQLAuthResponse>(new GraphQLRequest
         {
