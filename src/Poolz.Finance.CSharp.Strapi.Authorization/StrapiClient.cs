@@ -2,15 +2,16 @@
 using GraphQL.Client.Http;
 using Net.Web3.EthereumWallet;
 using GraphQL.Client.Serializer.Newtonsoft;
+using EnvironmentManager.Extensions;
 
 namespace Poolz.Finance.CSharp.Strapi.Authorization;
 
-public class StrapiClient(string apiUrl = StrapiClient.ApiUrl) : IStrapiClient
+public class StrapiClient() : IStrapiClient
 {
-    public const string ApiUrl = "https://data.poolz.finance/graphql";
+    public static Uri GraphQLUrl => Env.GRAPHQL_URL.GetRequired<Uri>();
 
-    private readonly GraphQLHttpClient _client = new(
-        new GraphQLHttpClientOptions { EndPoint = new Uri(apiUrl) },
+    public static GraphQLHttpClient Client => new(
+        new GraphQLHttpClientOptions { EndPoint = GraphQLUrl },
         new NewtonsoftJsonSerializer()
     );
 
@@ -55,7 +56,7 @@ public class StrapiClient(string apiUrl = StrapiClient.ApiUrl) : IStrapiClient
             .WithParameter(adminsFilter)
             .WithParameter(usersFilter);
 
-        var response = await _client.SendQueryAsync<GraphQLAuthResponse>(new GraphQLRequest
+        var response = await Client.SendQueryAsync<GraphQLAuthResponse>(new GraphQLRequest
         {
             Query = queryBuilder.Build()
         });
