@@ -9,11 +9,20 @@ public class AuthorizationServiceTests
     public class IsAuthorizedAsync
     {
         [Fact]
+        internal void WhenSetEnvironmentVariable_ShouldReturnIt()
+        {
+            var testUrl = new Uri("https://www.test.com");
+
+            Environment.SetEnvironmentVariable("GRAPHQL_URL", testUrl.ToString());
+            var url = StrapiClient.GraphQLUrl;
+            url.Should().Be(testUrl);
+        }
+        [Fact]
         internal async Task WhenAdministratorCall_ShouldReturnTrue()
         {
             var response = new GraphQLAuthResponse(
                 AdminResource: new AuthAdministratorsResource(),
-                Admins: [new AuthAdministrator ()],
+                Admins: [new AuthAdministrator()],
                 Users: []
             );
             var strapi = new MockStrapiClient(response);
@@ -33,7 +42,7 @@ public class AuthorizationServiceTests
             var response = new GraphQLAuthResponse(
                 AdminResource: new AuthAdministratorsResource
                 {
-                    OnlyAdminResources = new List<AuthResource> { new() }
+                    OnlyAdminResources = [new()]
                 },
                 Admins: [],
                 Users: []
@@ -55,7 +64,7 @@ public class AuthorizationServiceTests
             var response = new GraphQLAuthResponse(
                 AdminResource: new AuthAdministratorsResource
                 {
-                    OnlyAdminResources = new List<AuthResource>()
+                    OnlyAdminResources = []
                 },
                 Admins: [],
                 Users: [new AuthUser()]
@@ -77,7 +86,7 @@ public class AuthorizationServiceTests
             var response = new GraphQLAuthResponse(
                 AdminResource: new AuthAdministratorsResource
                 {
-                    OnlyAdminResources = new List<AuthResource>()
+                    OnlyAdminResources = []
                 },
                 Admins: [],
                 Users: []
@@ -93,79 +102,35 @@ public class AuthorizationServiceTests
             result.Should().BeFalse();
         }
     }
-
-    public class IsAdmin
+    public class GraphQLAuthResponseTests
     {
-        [Fact]
-        internal void WhenAdministratorCall_ShouldReturnTrue()
+        [Theory]
+        [InlineData(0, 0, 0)] // all false
+        [InlineData(1, 0, 0)] // admin only
+        [InlineData(0, 1, 0)] // admin resource only
+        [InlineData(0, 0, 1)] // user only
+        [InlineData(1, 1, 0)] // admin + admin resource
+        [InlineData(1, 0, 1)] // admin + user
+        [InlineData(0, 1, 1)] // admin resource + user
+        [InlineData(1, 1, 1)] // all true
+        internal void ShouldEvaluatePermissionFlagsCorrectly(
+            int adminCount,
+            int adminResourceCount,
+            int userCount)
         {
-            var result = AuthorizationService.IsAdmin(
-                admins: [new AuthAdministrator()]
+            var admins = Enumerable.Range(0, adminCount).Select(_ => new AuthAdministrator()).ToList();
+            var adminResources = Enumerable.Range(0, adminResourceCount).Select(_ => new AuthResource()).ToList();
+            var users = Enumerable.Range(0, userCount).Select(_ => new AuthUser()).ToList();
+
+            var result = new GraphQLAuthResponse(
+                AdminResource: new AuthAdministratorsResource { OnlyAdminResources = adminResources },
+                Admins: admins,
+                Users: users
             );
 
-            result.Should().BeTrue();
-        }
-
-        [Fact]
-        internal void WhenNonAdministratorCall_ShouldReturnFalse()
-        {
-            var result = AuthorizationService.IsAdmin(
-                admins: []
-            );
-
-            result.Should().BeFalse();
-        }
-    }
-
-    public class IsAdminResource
-    {
-        [Fact]
-        internal void WhenAdministratorResource_ShouldReturnTrue()
-        {
-            var result = AuthorizationService.IsAdminResource(
-                adminResource: new AuthAdministratorsResource
-                {
-                    OnlyAdminResources = new List<AuthResource> { new() }
-                }
-            );
-
-            result.Should().BeTrue();
-        }
-
-        [Fact]
-        internal void WhenNotAdministratorResource_ShouldReturnFalse()
-        {
-            var result = AuthorizationService.IsAdminResource(
-                adminResource: new AuthAdministratorsResource
-                {
-                    OnlyAdminResources = new List<AuthResource>()
-                }
-            );
-
-            result.Should().BeFalse();
-        }
-    }
-
-    public class IsAllowedResource
-    {
-        [Fact]
-        internal void WhenAuthorizedCall_ShouldReturnTrue()
-        {
-            var result = AuthorizationService.IsAllowedResource(
-                users: [new AuthUser()]
-            );
-
-            result.Should().BeTrue();
-        }
-
-        [Fact]
-        internal void WhenNotAuthorizedCall_ShouldReturnFalse()
-        {
-            var result = AuthorizationService.IsAllowedResource(
-                users: []
-            );
-
-            result.Should().BeFalse();
+            result.IsAdmin.Should().Be(adminCount > 0);
+            result.IsAdminResource.Should().Be(adminResourceCount > 0);
+            result.IsUserAllowed.Should().Be(userCount > 0);
         }
     }
 }

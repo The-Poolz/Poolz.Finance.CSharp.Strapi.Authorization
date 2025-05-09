@@ -28,6 +28,7 @@
   <ItemGroup>
     <PackageReference Include="Net.Web3.EthereumWallet" Version="1.2.0" />
     <PackageReference Include="Poolz.Finance.CSharp.Strapi" Version="1.1.0" />
+    <PackageReference Include="Utils.EnvironmentManager" Version="4.1.0" />
   </ItemGroup>
 
 </Project>
